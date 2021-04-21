@@ -21,7 +21,7 @@
 - 파이썬 기초쪽에서 이미 언급하였지만 한 번 더 요약해서 적는다.
 
   ~~~python
-a = [1, 2, 3, 4, 5]
+  a = [1, 2, 3, 4, 5]
   squares = [x**2 for x in a]       # good
   squares = map(lambda x: x**2, a)  # bad
   
@@ -45,7 +45,7 @@ a = [1, 2, 3, 4, 5]
 - 파일이 너무 클 때에는 하나씩 불러오는 generator을 사용하자
 
   ~~~python
-value = [len(x) for x in open("/tmp/my_file.txt")]  # 파일이 너무 크면 문제 생길 수 있음
+  value = [len(x) for x in open("/tmp/my_file.txt")]  # 파일이 너무 크면 문제 생길 수 있음
   it = (len(x) for x in open("/tmp/my_file.txt"))     # 이런 식으로 하나씩 참조 가능
   print(next(it))
   print(nexx(it))

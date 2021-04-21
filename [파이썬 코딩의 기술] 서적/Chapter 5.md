@@ -103,7 +103,7 @@
 - 아래 함수는 `group`에 속한 얘들을 우선적으로 보여주면서 sorting하는 함수이다.
 
   ~~~python
-numbers = [8, 3, 1, 2, 5, 4, 7, 6]
+  numbers = [8, 3, 1, 2, 5, 4, 7, 6]
   group = {2, 3, 5, 7}
   def sort_priority(values, group):
       def helper(x):
