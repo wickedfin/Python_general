@@ -1,6 +1,6 @@
 # 3장 : 함수
 
-<div style="text-align: right"> 마지막 수정 : 2020-12-29
+<div style="text-align: right"> 마지막 수정 : 2020-12-30
 
 
 [TOC]
@@ -20,7 +20,7 @@
 - 아래 함수의 문제점은 값이 0이거나 None이거나, 둘 다 검사식에서 False로 처리된다는 것이다.
 
   ~~~python
-def divide(a, b):
+  def divide(a, b):
       try:
           return a / b
       except ZeroDivisionError:
@@ -118,7 +118,7 @@ def divide(a, b):
 - 내장 함수 list를 통해 손쉽게 리스트로 변환 가능하다
 
   ~~~python
-result = list(index_words_iter(address))
+  result = list(index_words_iter(address))
   ~~~
   
 - 제너레이터의 정의에 있어서 주의해야할 것은 이터레이터는 **현 상태**라는 것이 있고 재사용이 불가능하다는 것이다.
@@ -237,7 +237,7 @@ result = list(index_words_iter(address))
 - 함수 정의 시에 * 별표를 위치인수와 키워드 전용인수 사이에 놓아줌으로써 키워드 전용 인수를 정의할 수 있다.
 
   ~~~python
-def safe_division(number, divisor, *, ignore_overflow=False, ignore_zero_division=False):
+  def safe_division(number, divisor, *, ignore_overflow=False, ignore_zero_division=False):
       try:
           return number / divisor
       except OverflowError:
@@ -261,6 +261,35 @@ def safe_division(number, divisor, *, ignore_overflow=False, ignore_zero_divisio
 - 이는 실수하기 쉽기 때문이고, 만약 해야한다면 *경량 클래스*나 *namedtuple*을 사용하자
 
 
+
+### 8. functools.wrap을 사용해 함수 데코레이터를 정의하라
+
+- 데코레이터는 자신이 감싸고 있는 함수가 호출되기 전, 또는 후에 코드를 추가로 실행해준다.
+
+  - 가령 어떤 함수에 들어가기 전후에 **타입 변환등**을 정의하는 함수를 실행할 수 있다.
+  - 또한 오류를 미연에 방지해주기 위해 `functools.wrap`를 사용해주는 것이 좋다.
+
+- 아래는 html tag를 붙이는 데코레이터 예시. Hi 구문 앞뒤로 html tag를 붙여주는 역할을 한다.
+
+  ~~~python
+  from functools import wraps
+  
+  def html(func):
+  	@wraps(func)
+      def wrapper(*args, **kwargs):
+          print("<html>")
+          func(*args, **kwargs)
+          print("</html>")
+      return wrapper
+  
+  @html
+  def test(text):
+      print(text)
+      
+  test("Hi")
+  ~~~
+
+  
 
 
 
