@@ -25,7 +25,9 @@ def divide(a, b):
           return a / b
       except ZeroDivisionError:
           return None
-  # if not None: print("hello")  >>  hello
+      
+  if not None: print("hello")
+  >>  hello
   ~~~
   
 - 따라서 아래처럼 예외를 일으켜주는 것이 좋다.
@@ -248,9 +250,9 @@ def safe_division(number, divisor, *, ignore_overflow=False, ignore_zero_divisio
               return float('inf')
           else:
               raise
-              
-  # 위처럼 구현해두면 이제 키워드 인수를 함수 호출에서 사용 시, 반드시 키워드를 명시해야 함.
   ~~~
+  
+- 위처럼 구현해두면 이제 키워드 인수를 함수 호출에서 사용 시, 반드시 키워드를 명시해야 함.
 
 
 
@@ -264,6 +266,6 @@ def safe_division(number, divisor, *, ignore_overflow=False, ignore_zero_divisio
 
 ## <span style="color:green">[비고]</span>
 
-- 하나 이해 못한 게 있음. 나중에 차근히 읽어보는 걸로 하자구.
-- 오우 쉣... 내가 함수 인수 호출에 대해서 이렇게 몰랐다고? 지금이라도 알아서 다행이다.
-- 이제 4장으로 가봅시다...
+- 3장 모두 공부하였음.
+- 데코레이터 함수 개념이 재밌네. 자주 써 봐야겠다.
+- 이제 4장으로 가봅시다.
