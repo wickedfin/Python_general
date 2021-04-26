@@ -148,8 +148,133 @@
 
 
 
+### 3. @property
+
+- 여긴 책에 나오는 내용은 아니고, 그냥 찾아봄
+
+- 클래스 인스턴스의 내부 데이터를 보호하기 위해 접근용 메서드를 작성하는 것은 객체 지향 프로그래밍에서의 흔한 패턴
+
+  - 즉 **getter와 setter**를 사용하는 건데, 이걸 파이썬에서는 **property 데코레이터**로 예쁘게 구현할 수 있다.
+
+- 그냥 인스턴스로 구현하는 것보다 외부로부터 안전하게 만들 수 있다. (가령 나이는 음수가 될 수 없다는 식으로)
+
+  ~~~python
+  class Person:
+      def __init__(self, first_name, last_name, age):
+          self.first_name = first_name
+          self.last_name = last_name
+          self.age = age
+          # 여기가 _age가 아니라 그냥 age여야 setter의 조건이 적용되던데 이유는 모르겠음.
+  
+      @property
+      def age(self):
+          return self._age
+  
+      @age.setter
+      def age(self, age):
+          if age < 0:
+              raise ValueError("Invalied age")
+          # 나이에 음수를 설정할 수 없도록 인스턴스 보호
+          self._age = age
+  
+      @age.deleter  # 사용할 일이 많지는 않을 거 같다.
+      def age(self):
+          del self._age
+  
+      @property
+      def full_name(self):
+          return self.first_name + " " + self.last_name
+  
+  james = Person("James", "Lee", 28)
+  print(james.age)
+  james.age += 1
+  print(james.age)
+  james.age = 20
+  print(james.age)
+  # del(james.age)
+  # print(james.age)
+  print(james.full_name)
+  
+  mason = Person("Mason", "Lee", -1)  # 오류를 일으킴
+  ~~~
+
+
+
+### 4. @classmethod를 활용해 다형성을 확보하라
+
+- 이 부분 책의 내용이 복잡하여, @staticmethod과 @classmethod가 무엇인지에 대한 내용으로 대체해둔다.
+
+- 우선 파이썬 클래스 안에서 정의되는 메소드는 크게 3가지로 아래와 같다.
+
+  > 인스턴스 메소드, 스태틱 메소드, 클래스 메소드
+
+- 위 3개 중 후자의 2개를 **정적 메소드**라고 한다. 
+
+  - 본래 익숙한 방식은 `1)클래스 정의 2)객체 생성 3)메소드 호출`의 방식일 것이다.
+  - 정적 메소드는 **객체의 생성 없이, 호출이 가능한**(접근 가능한) 메소드를 의미한다.
+
+- 인스턴스 메소드는, 첫번째 인자로 인스턴스 자신(self)을 전달하지만 ,클래스 메소드는 첫번째 인자로 클래스 자신(cls)을 전달한다. 
+
+- 스태틱 메소드는 인스턴스나 클래스를 인자로 받지 않는다.
+
+- 클래스 메서드는 클래스 속성에 접근하거나 클래스 메서드를 호출할 수 있으나, 인스턴스 속성이나 인스턴스 메서드에 접근하면 안된다.
+
+  - 클래스메서드는 팩토리 메서드 작성 시에 유용하게 사용된다.
+
+  ~~~python
+  class User:
+      def __init__(self, email, password):
+          self.email = email
+          self.password = password
+  
+      @classmethod
+      def fromTuple(cls, tup):
+          return cls(tup[0], tup[1])
+  
+      @classmethod
+      def fromDictionary(cls, dic):
+          return cls(dic["email"], dic["password"])
+  
+  
+  # 기본 생성자로 객체 생성
+  user = User("user@test.com", "1245")
+  print(user.email, user.password)
+  
+  # 클래스메서드-tuple로 객체 생성
+  user = User.fromTuple(("user@test.com", "1245"))
+  print(user.email, user.password)
+  
+  # 클래스메서드-dictionary로 객체 생성
+  user = User.fromDictionary({"email": "user@test.com", "password": "1245"})
+  print(user.email, user.password)
+  ~~~
+
+  - 클래스 메서드는 상속 받는 하위 클래스에서의 다형성을 위해서도 많이 활용된다.
+
+- 정적메소드의 경우, 사실 사용할 일이 그렇게 많지는 않다. 클래스 method와 다르게, 절대경로로 class를 적어주어야한다.
+
+  - 비슷한 기능의 유틸리티 메서드들을 하나의 class 아래에 정리할 때 주로 사용한다. 
+
+  ~~~python
+  class StringUtils:
+      @staticmethod
+      def toCamelcase(text):
+          words = iter(text.split("_"))
+          return next(words) + "".join(i.title() for i in words)
+  
+      @staticmethod
+      def toSnakecase(text):
+          letters = ["_" + i.lower() if i.isupper() else i for i in text]
+          return "".join(letters).lstrip("_")
+  ~~~
+
+
+
 
 
 ## <span style="color:green">[비고]</span>
 
 - 4장에 앞서서 보고 있음.
+- 일부 내용을 아래의 링크에서 가져왔음
+  - https://www.daleseo.com/python-class-methods-vs-static-methods/
+  - 위 링크 유용한 거 같아서, 후에 한 번 다 봐둘 예정
