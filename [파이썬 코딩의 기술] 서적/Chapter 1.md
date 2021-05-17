@@ -84,6 +84,20 @@
   number = 1.23456
   print(f'내가 고른 숫자는 {number:.{places}f}')
   ~~~
+  
+- f-문자열 안에서 객체를 사용하면 해당 객체의 `__str__()`메서드가 호출된 결과가 삽입된다.
+
+  - 만약 `__repr__()`메서드가 호출된 결과를 삽입하고 싶다면 `!r`을 뒤에 붙여주면 된다.
+
+  ~~~python
+  from datetime import date
+  print(f"오늘은 {data.today()} 입니다.")
+  >> '오늘은 2021-02-27 입니다.'
+  print(f"오늘은 {data.today()!r} 입니다.")
+  >> '오늘은 datetime.date(2021, 2, 27) 입니다.'
+  ~~~
+
+  
 
 
 

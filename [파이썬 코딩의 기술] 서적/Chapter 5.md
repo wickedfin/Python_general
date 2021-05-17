@@ -1,6 +1,7 @@
 # 5장 : 클래스와 인터페이스
 
-<div style="text-align: right"> 마지막 수정 : 2020-01-04
+<div style="text-align: right"> 마지막 수정 : 2021-05-17
+
 
 
 
@@ -270,11 +271,121 @@
 
 
 
+### 5. super로 부모 클래스를 초기화하라
+
+- 자식 클래스에서 부모 클래스를 초기화하는 오래된 방법은 자식 인스턴스에서 부모 클래스의 `__init__` 메서드를 직접 호출하는 것
+
+  - 하지만 이 경우 다중 상속을 할 때에는 문제가 생길 수 있다. (다중 상속도 사실 하면 안 됨)
+
+  ~~~python
+  class MyBaseClass:
+      def __init__(self, value):
+          self.value = value
+          
+  class TimesTwo:
+      def __init__(self):
+          self.value *= 2
+          
+  class PlusFive:
+      def __init__(self):
+          self.valeu += 5
+          
+  class OneWay(MyBaseClass, TimesTwo, PlusFive):  # 여기의 나열 순서가 아닌
+      def __init__(self, value):  # 여기에서의 생성자 호출 순서를 따르게 됨.
+          MyBaseClass.__init__(self, value)
+          TimesTwo.__init__(self)
+          PlusFive.__init__(self)
+          
+  foo = OneWay(5)
+  ~~~
+
+  - 위의 예시에서 `foo`라는 변수에는 15라는 값이 들어가게 된다. `OneWay`부모 클래스를 나열한 순서가 아닌, 생성자 호출 순서를 따라가게 된다.
+    - 즉, 헷갈리고 실수를 했을 시 잡아내기 힘들어짐
+  - 또한 다이아몬드 상속에서도 문제를 일으킬 수 있음. 후에 호출되는 생성자가 다이아몬드 꼭지점 클래스의 생성자를 호출하면 앞 선 호출자의 생성자에서 수행된 코드는 무시될 수도 있기 때문
+
+- 따라서, `super`를 사용해서 MRO(표준 메서드 결정 순서)를 따라가게 해주면 명료해진다.
+
+  ~~~python
+  class TimesSevenCorrect(MyBaseClass):
+      def __init__(self, value):
+          super().__init__(value)
+          self.value *= 7
+          
+  class PlusNineCorrect(MyBaseClass):
+      def __init__(self, value):
+          super().__init__(value)
+          self.valeu += 9
+          
+  class GoodWay(TimesSevenCorrect, PlusNineCorrect):
+      def __init__(self, value):
+          super().__init__(value)  # 일일이 부모 클래스의 이름을 적어가면 초기화할 필요가 없다.
+                           
+  foo = GoodWay(5)
+  ~~~
+
+  - `mro_str = '\n'.join(repr(cls) for cls in GoodWay.mro ())` 를 실행해보면 MRO 순서를 알 수 있다.
+  - 다이아몬드 상속의 꼭지점을 만나면 그 역순으로 호출을 실행하기에 9가 먼저 더해지고 후에 7이 곱해진 것
+  - `super`에 파라미터를 제공해야하는 경우는, 자식 클래스에서 상위 클래스의 특정 기능에 접근해야할 때 뿐이라고 하는데, 이 경우가 뭔지 모르겠다.
+
+
+
+### 6. 기능을 합성할 때는 믹스인 클래스를 사용하라
+
+- 이거 몰랐던 기능인데 꽤 유용할 거 같음. 자세히 보자
+
+- 믹스인은 자식 클래스가 사용할 메서드 몇 개만 정의하는 클래스이다.
+
+  - 다중 상속이 제공하는 편의와 캡슐화가 필요하지만, 다중 상속의 골치 아픈 상황을 피하고 싶을 때 좋다.
+  - 반복적인 코드를 최소화하고 재사용성을 극대화할 수 있다.
+
+- 근데 설명 읽어보니까, 결국 다중 상속으로 구현해야하는 거 같은데, 다중 상속 사용하는 거랑 무슨 차이인 지 모르겠다.
+
+  - 책의 설명을 봤을 때는 이해가 안돼서, 구글링을 좀 해봤음.
+  - 믹스인을 구현할 때에만 다중 상속을 사용하는 것이 좋다고하네.
+
+- 일단 믹스인 클래스는 **자체 인스턴스 속성을 가지지 않음**, 또 **__init__** 메서드를 구현하지 않음. 이게 핵심 포인트인 거 같음.
+
+  - 그러니까 정말 기능 만을 정의해둔 클래스라는 느낌인 거 같네. (참고로 클래스 속성은, 클래스의 인스턴스 모두가 공유함)
+  - 필요에 따라 믹스인 안에 인스턴스 메서드는 물론 클래스 메서드도 포함될 수 있다.
+
+  ~~~python
+  class HelloMixIn:
+      def greeting(self):
+          print("안녕하세요.")
+       
+  class Person():
+      def __init__(self, name):
+          self.name = name
+          
+  class Student(HelloMixIn, Person):  # 기능을 합성 후, 나머지를 구현하는 방식인 거 같네. Person은 인스턴스 속성 있으니 믹스인 아님.
+      def study(self):
+          print("공부하기")
+          
+  class Teacher(HelloMixIn, Person):
+      def teach(self):
+          print("가르치기")
+  ~~~
+
+  - 보니까 분류별로 기능을 간단히 만들어두고, 합성을 통해 필요한 것들을 만들어가는 거 같은데 지금 내 수준에서 크게 쓸 일이 생길까?
+  - 그냥 Util 같은 클래스 하나 만들어두고, 전부 staticmethod로 정의한 후에 쓰는 게 더 편리할 것도 같은데 흠
+
+
+
+### 7. 비공개 애트리뷰트보다는 공개 애트리뷰트를 사용하자
+
+- 파이썬에서는 비공개라고해서 접근 못하는 것 아니다. 귀찮을 뿐.
+- 따라서 어차피 접근성을 막지 못하는데, 비공개 애트리뷰트를 사용하면 확장이나 하위 클래스에서의 오버라이드를 귀찮게 할 뿐이다.
+- 따라서 밑줄 한 줄을 통해 보호 필드로 만들고, 크래스 외부에서 이 필드를 사용하는 경우, 조심해야한다는 경고 정도만 남겨주는 것이 좋다.
+  - 이 편이 다른 프로그래머나 미래의 자신에게 클래스를 안전하게 확장하는 가이드 라인을 제공하기에 좋다.
+- 비공개 애트리뷰트를 사용하는 거의 유일한 경우는, 하위 클래스의 필드와 이름이 충돌할 수 있는 경우 뿐이다.
+  - 주로 공개 API에 속한 클래스에서 신경 써야 한다. 특히 `value`처럼 흔한 애트리뷰트 명일 경우에는 비공개로 처리해서 충돌을 막아주는 것이 좋다.
+
 
 
 ## <span style="color:green">[비고]</span>
 
 - 4장에 앞서서 보고 있음.
+- 5장 이제 한 챕터 남음.
 - 일부 내용을 아래의 링크에서 가져왔음
   - https://www.daleseo.com/python-class-methods-vs-static-methods/
   - 위 링크 유용한 거 같아서, 후에 한 번 다 봐둘 예정
